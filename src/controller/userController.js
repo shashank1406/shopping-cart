@@ -372,6 +372,50 @@ const updateUser = async function (req, res) {
             const profilePicture = await uploadFile(files[0], 'user')
             userData.profileImage = profilePicture
         }
+       if(address.shipping.street){
+
+        if (!isValid(address.shipping.street)) {
+            res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
+            return
+        }
+    }
+
+    if(address.shipping.city){
+        if (!isValid(address.shipping.city)) {
+            res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
+            return
+        }
+    }
+
+    if(address.shipping.pincode){
+        if (!isValid(address.shipping.pincode)) {
+            res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
+            return
+        }
+    }
+
+        // //---------billing address validation
+
+    if(address.billing.street){
+        if (!isValid(address.billing.street)) {
+            res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
+            return
+        }
+    }
+    
+    if(address.billing.city){
+        if (!isValid(address.billing.city)) {
+            res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
+            return
+        }
+    }
+
+    if(address.billing.pincode){
+        if (!isValid(address.billing.pincode)) {
+            res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
+            return
+        }
+    }
 
 
 
