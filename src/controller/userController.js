@@ -304,10 +304,8 @@ const updateUser = async function (req, res) {
         const password = requestBody.password
         const address = requestBody.address
 
-        const userData = {
-            
-            address: address
-        }
+        const userData ={}
+        
 
         if (fname) {
 
@@ -369,8 +367,8 @@ const updateUser = async function (req, res) {
 
         }
         if (files) {
-            const profilePicture = await uploadFile(files[0], 'user')
-            userData.profileImage = profilePicture
+            const ProfilePicture = await uploadFile(files[0], 'user')
+            userData.profileImage = ProfilePicture
         }
        if(address.shipping.street){
 
@@ -378,6 +376,7 @@ const updateUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
             return
         }
+        userData.address.shipping.street=address.shipping.street
     }
 
     if(address.shipping.city){
@@ -385,6 +384,7 @@ const updateUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
             return
         }
+        userData.address.shipping.city=address.shipping.city
     }
 
     if(address.shipping.pincode){
@@ -392,6 +392,7 @@ const updateUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
             return
         }
+        userData.address.shipping.pincode=address.shipping.pincode
     }
 
         // //---------billing address validation
@@ -401,6 +402,7 @@ const updateUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
             return
         }
+        userData.address.billing.street=address.billing.street
     }
     
     if(address.billing.city){
@@ -408,6 +410,7 @@ const updateUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
             return
         }
+        userData.address.billing.city=address.billing.city
     }
 
     if(address.billing.pincode){
@@ -415,6 +418,7 @@ const updateUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
             return
         }
+        userData.address.billing.pincode=address.billing.pincode
     }
 
 
@@ -425,6 +429,7 @@ const updateUser = async function (req, res) {
 
     }
     catch (error) {
+        console.log(error)
         res.status(500).send({ status: false, Message: error.message })
     }
 }
