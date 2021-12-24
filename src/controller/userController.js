@@ -1,8 +1,13 @@
 const userModel = require('../model/userModel');
-const aws = require('aws-sdk')
+
+const {uploadFile} = require('./awsController')
+
 const bcrypt = require('bcrypt')
+
 const validator = require('validator')
+
 const jwt = require('jsonwebtoken')
+
 let saltRounds = 10
 
 //-------------------------------validation functions-----------------------
@@ -28,36 +33,7 @@ const isValidfiles = function (files) {
         return true
 }
 
-//--------------------------------AWS Configuration-------------------------------------
 
-aws.config.update({
-    accessKeyId: "AKIAY3L35MCRRMC6253G",
-    secretAccessKey: "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",
-    region: "ap-south-1",
-})
-
-//--------------------------------AWS file upload--------------------------
-
-const uploadFile = async function (file, name) {
-    return new Promise(function (resolve, reject) {
-        // Create S3 service object
-        const s3 = new aws.S3({ apiVersion: "2006-03-01" })
-        const uploadParams = {
-            ACL: "public-read", /// this file is accesible publically..permission
-            Bucket: "classroom-training-bucket", // HERE
-            Key: name + "/" + file.originalname, // HERE
-            Body: file.buffer,
-        }
-        s3.upload(uploadParams, function (err, data) {
-            if (err) {
-                return reject({ "error": err })
-            }
-            console.log(data)
-            console.log(`File uploaded successfully. ${data.Location}`)
-            return resolve(data.Location) //HERE 
-        })
-    })
-}
 //------------------------first api to create user-------------------------------------------------
 
 const createUser = async function (req, res) {
@@ -281,7 +257,7 @@ const updateUser = async function (req, res) {
 
     try {
 
-        const requestBody = req.body
+        const requestBody = JSON.parse(req.body.data)
 
         const userId = req.params.userId
 
@@ -291,20 +267,14 @@ const updateUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "unauthorized access" })
         }
 
-        if (!isValidRequestBody(requestBody)) {
-            res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
-            return
-        }
+        // if (!isValidRequestBody(requestBody)) {
+        //     res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
+        //     return
+        // }
 
-        const files = req.files
-        const fname = requestBody.fname
-        const lname = requestBody.lname
-        const email = requestBody.email
-        const phone = requestBody.phone
-        const password = requestBody.password
-        const address = requestBody.address
-
-        const userData ={}
+        const {fname,lname,email,phone,password,address} = requestBody
+       
+        const userData = {}
         
 
         if (fname) {
@@ -344,6 +314,7 @@ const updateUser = async function (req, res) {
             userData.email = email
         }
         if (phone) {
+
             if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone))) {
                 res.status(400).send({ status: false, message: `phone no should be a valid phone no` })
                 return
@@ -354,74 +325,93 @@ const updateUser = async function (req, res) {
                 res.status(400).send({ status: false, message: `${phone}  phone is already registered` })
                 return
             }
+
             userData.phone = phone
         }
 
         if (password) {
+
             if (!isValidPassword(password)) {
                 res.status(400).send({ status: false, Message: "Please provide a vaild password ,Password should be of 8 - 15 characters" })
                 return
             }
             const encryptedPassword = await bcrypt.hash(password, saltRounds)
+
             userData.password = encryptedPassword
 
         }
-        if (files) {
+        const files = req.files
+
+        if (isValidfiles(files)) {
+
             const ProfilePicture = await uploadFile(files[0], 'user')
             userData.profileImage = ProfilePicture
+
         }
-       if(address.shipping.street){
 
-        if (!isValid(address.shipping.street)) {
-            res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
-            return
-        }
-        userData.address.shipping.street=address.shipping.street
-    }
+      if(address){
 
-    if(address.shipping.city){
-        if (!isValid(address.shipping.city)) {
-            res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
-            return
-        }
-        userData.address.shipping.city=address.shipping.city
-    }
+          if(address.shipping){
 
-    if(address.shipping.pincode){
-        if (!isValid(address.shipping.pincode)) {
-            res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
-            return
-        }
-        userData.address.shipping.pincode=address.shipping.pincode
-    }
+            if(address.shipping.street){
 
-        // //---------billing address validation
+                if (!isValid(address.shipping.street)) {
+                    res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
+                    return
+                }
+                userData["address.shipping.street"] = address.shipping.street
+            }
+        
+              if(address.shipping.city){
+                if (!isValid(address.shipping.city)) {
+                    res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
+                    return
+                }
+                userData["address.shipping.city"]=address.shipping.city
+            }
+        
+            if(address.shipping.pincode){
+                if (!isValid(address.shipping.pincode)) {
+                    res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
+                    return
+                }
+                userData["address.shipping.pincode"] = address.shipping.pincode
+            }
 
-    if(address.billing.street){
-        if (!isValid(address.billing.street)) {
-            res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
-            return
-        }
-        userData.address.billing.street=address.billing.street
-    }
-    
-    if(address.billing.city){
-        if (!isValid(address.billing.city)) {
-            res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
-            return
-        }
-        userData.address.billing.city=address.billing.city
-    }
+          }
 
-    if(address.billing.pincode){
-        if (!isValid(address.billing.pincode)) {
-            res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
-            return
-        }
-        userData.address.billing.pincode=address.billing.pincode
-    }
+          if(address.billing){
 
+            if(address.billing.street){
 
+                if (!isValid(address.billing.street)) {
+                    res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
+                    return
+                }
+                userData["address.billing.street"] = address.billing.street
+            }
+            
+            if(address.billing.city){
+                if (!isValid(address.billing.city)) {
+                    res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
+                    return
+                }
+        
+                userData["address.billing.city"] = address.billing.city
+            }
+        
+            if(address.billing.pincode){
+        
+                if (!isValid(address.billing.pincode)) {
+                    res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
+                    return
+                }
+        
+                userData["address.billing.pincode"] = address.billing.pincode
+            }
+
+          }
+      }
 
         const newUser = await userModel.findOneAndUpdate({ _id: req.params.userId }, userData, { new: true })
 
@@ -429,8 +419,10 @@ const updateUser = async function (req, res) {
 
     }
     catch (error) {
+
         console.log(error)
         res.status(500).send({ status: false, Message: error.message })
+        
     }
 }
 
