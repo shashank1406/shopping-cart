@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken')
 
 let saltRounds = 10
 
-//-------------------------------validation functions-----------------------
+//------------------------------- validation functions ---------------------------------------------------------------------------------
 
 
 const isValid = function (value) {
@@ -34,25 +34,25 @@ const isValidfiles = function (files) {
 }
 
 
-//------------------------first api to create user-------------------------------------------------
+//------------------------ first api to create user -----------------------------------------------------------------------------------------
 
 const createUser = async function (req, res) {
     try {
 
-        const requestBody = req.body
+        const requestBody = JSON.parse(req.body.data)
 
         if (!isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
             return
         }
-        const files = req.files
-        const fname = requestBody.fname
-        const lname = requestBody.lname
-        const email = requestBody.email
-        const phone = requestBody.phone
-        const password = requestBody.password
-        const address = requestBody.address
 
+        const {fname,lname,email,phone,password,address} = requestBody
+
+        const files = req.files
+        if (!isValidfiles(files)) {
+            res.status(400).send({ status: false, Message: "Please provide user's profile picture" })
+            return
+        }
 
         if (!isValid(fname)) {
             res.status(400).send({ status: false, Message: "Please provide user's first name" })
@@ -60,11 +60,6 @@ const createUser = async function (req, res) {
         }
         if (!isValid(lname)) {
             res.status(400).send({ status: false, Message: "Please provide user's last name" })
-            return
-        }
-
-        if (!isValidfiles(files)) {
-            res.status(400).send({ status: false, Message: "Please provide user's profile picture" })
             return
         }
 
@@ -83,41 +78,43 @@ const createUser = async function (req, res) {
             return
         }
 
-
-
-
-        //---------shipping address validation
-
-        if (!isValid(address.shipping.street)) {
-            res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
-            return
-        }
-        if (!isValid(address.shipping.city)) {
-            res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
-            return
-        }
-        if (!isValid(address.shipping.pincode)) {
-            res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
+        if (!isValid(address)) {
+            res.status(400).send({ status: false, Message: "Please provide password" })
             return
         }
 
-        // //---------billing address validation
-
-
-        if (!isValid(address.billing.street)) {
-            res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
-            return
+        if(address){
+            if(address.shipping){
+                if (!isValid(address.shipping.street)) {
+                    res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
+                    return
+                }
+                if (!isValid(address.shipping.city)) {
+                    res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
+                    return
+                }
+                if (!isValid(address.shipping.pincode)) {
+                    res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
+                    return
+                }
+            }
+            if(address.billing){
+                if (!isValid(address.billing.street)) {
+                    res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
+                    return
+                }
+                if (!isValid(address.billing.city)) {
+                    res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
+                    return
+                }
+                if (!isValid(address.billing.pincode)) {
+                    res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
+                    return
+                }
+            }
         }
-        if (!isValid(address.billing.city)) {
-            res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
-            return
-        }
-        if (!isValid(address.billing.pincode)) {
-            res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
-            return
-        }
 
-        // //-----------------------------email and phone  and password validationvalidation-----------------------------
+        // //-----------------------------email and phone  and password validationvalidation-------------------------------------------------
 
 
         if (!(validator.isEmail(email.trim()))) {
@@ -135,7 +132,7 @@ const createUser = async function (req, res) {
 
 
 
-        // //-----------------------------------unique validation -------------------------------------
+        // //-----------------------------------unique validation ----------------------------------------------------------------------------------------------
 
         let Email = email.split(' ').join('')
 
@@ -153,9 +150,9 @@ const createUser = async function (req, res) {
             return
         }
 
-        //--------------------validation ends -----------------------
+        //--------------------validation ends -------------------------------------------------------------------------------------------------------------
 
-        const profilePicture = await uploadFile(files[0], 'user')
+        const profilePicture = await uploadFile(files[0])
 
         const encryptedPassword = await bcrypt.hash(password, saltRounds)
 
@@ -176,7 +173,7 @@ const createUser = async function (req, res) {
     }
 }
 
-// ============================ second login api ======================================================
+// ============================ second login api =============================================================================================
 
 const doLogin = async function (req, res) {
     try {
@@ -225,7 +222,7 @@ const doLogin = async function (req, res) {
     }
 };
 
-// =====================third appi to get data by user id ========================================================
+// =====================third appi to get data by user id ================================================================================================
 
 
 const getuserById = async (req, res) => {
@@ -344,7 +341,7 @@ const updateUser = async function (req, res) {
 
         if (isValidfiles(files)) {
 
-            const ProfilePicture = await uploadFile(files[0], 'user')
+            const ProfilePicture = await uploadFile(files[0])
             userData.profileImage = ProfilePicture
 
         }
@@ -426,6 +423,8 @@ const updateUser = async function (req, res) {
     }
 }
 
+
+// =================================================================================================================================================
 
 
 module.exports.createUser = createUser
