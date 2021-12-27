@@ -1,33 +1,23 @@
 const userModel = require('../model/userModel');
-
 const {uploadFile} = require('./awsController')
-
 const bcrypt = require('bcrypt')
-
 const validator = require('validator')
-
 const jwt = require('jsonwebtoken')
-
 let saltRounds = 10
-
 //------------------------------- validation functions ---------------------------------------------------------------------------------
-
 
 const isValid = function (value) {
     if (typeof value === 'undefined' || value === null) return false
     if (typeof value === 'string' && value.trim().length === 0) return false
     return true;
 }
-
 const isValidRequestBody = function (requestBody) {
     return Object.keys(requestBody).length > 0
 }
-
 const isValidPassword = function (password) {
     if (password.length > 7 && password.length < 16)
         return true
 }
-
 const isValidfiles = function (files) {
     if (files && files.length > 0)
         return true
@@ -40,7 +30,6 @@ const createUser = async function (req, res) {
     try {
 
         const requestBody = JSON.parse(req.body.data)
-
         if (!isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
             return
@@ -53,7 +42,6 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide user's profile picture" })
             return
         }
-
         if (!isValid(fname)) {
             res.status(400).send({ status: false, Message: "Please provide user's first name" })
             return
@@ -62,27 +50,22 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide user's last name" })
             return
         }
-
         if (!isValid(email)) {
             res.status(400).send({ status: false, Message: "Please provide user's email" })
             return
         }
-
         if (!isValid(phone)) {
             res.status(400).send({ status: false, Message: "Please provide a vaild phone number" })
             return
         }
-
         if (!isValid(password)) {
             res.status(400).send({ status: false, Message: "Please provide password" })
             return
         }
-
         if (!isValid(address)) {
             res.status(400).send({ status: false, Message: "Please provide password" })
             return
         }
-
         if(address){
             if(address.shipping){
                 if (!isValid(address.shipping.street)) {
@@ -114,13 +97,12 @@ const createUser = async function (req, res) {
             }
         }
 
-        // //-----------------------------email and phone  and password validationvalidation-------------------------------------------------
+        // //----------------------------- email and phone  and password validationvalidation -------------------------------------------------
 
 
         if (!(validator.isEmail(email.trim()))) {
             return res.status(400).send({ status: false, msg: 'enter valid email' })
         }
-
         if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone))) {
             res.status(400).send({ status: false, message: `phone no should be a valid phone no` })
             return
@@ -130,21 +112,17 @@ const createUser = async function (req, res) {
             return
         }
 
-
-
         // //-----------------------------------unique validation ----------------------------------------------------------------------------------------------
 
         let Email = email.split(' ').join('')
 
         const isEmailAlreadyUsed = await userModel.findOne({ email: Email });
-
         if (isEmailAlreadyUsed) {
             res.status(400).send({ status: false, message: `${Email} email address is already registered` })
             return
         }
 
         const isPhoneAlreadyUsed = await userModel.findOne({ phone: phone });
-
         if (isPhoneAlreadyUsed) {
             res.status(400).send({ status: false, message: `${phone}  phone is already registered` })
             return
@@ -177,16 +155,14 @@ const createUser = async function (req, res) {
 
 const doLogin = async function (req, res) {
     try {
-
         let requestBody = req.body
 
-        // request body validation 
+     // request body validation 
 
         if (!isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide login details' })
             return
         }
-
         if (requestBody.email && requestBody.password) {
 
             // email id or password is velid or not check validation 
@@ -212,9 +188,7 @@ const doLogin = async function (req, res) {
             res.header('x-api-key', generatedToken);
 
             res.status(200).send({ status: true, data: " user  login successfull", userId: userEmail._id, token: { generatedToken } })
-
         } else {
-
             res.status(400).send({ status: false, msg: "must contain email and password" })
         }
     } catch (error) {
@@ -222,26 +196,22 @@ const doLogin = async function (req, res) {
     }
 };
 
-// =====================third appi to get data by user id ================================================================================================
+// ===================== third appi to get data by user id ================================================================================================
 
 
 const getuserById = async (req, res) => {
     try {
-
-        //  authorization  //
-
+         //  authorization  //
         const userId = req.params.userId
 
         if (!(userId === req.userId)) {
             return res.status(400).send({ status: false, msg: "unauthorized access" })
         }
-
         const searchprofile = await userModel.findOne({ _id: userId })
 
         if (!searchprofile) {
             return res.status(404).send({ status: false, message: ' user profile  does not exist' })
         }
-
         return res.status(200).send({ status: true, message: 'user profile details', data: searchprofile })
 
     } catch (error) {
@@ -249,11 +219,11 @@ const getuserById = async (req, res) => {
     }
 }
 
+// =============================== fourth api to update a user ==================================================================//
 
 const updateUser = async function (req, res) {
 
     try {
-
         const requestBody = JSON.parse(req.body.data)
 
         const userId = req.params.userId
@@ -270,32 +240,25 @@ const updateUser = async function (req, res) {
         // }
 
         const {fname,lname,email,phone,password,address} = requestBody
-       
         const userData = {}
-        
-
+    
         if (fname) {
-
             if (!isValid(fname)) {
                 res.status(400).send({ status: false, Message: "Please provide user's first name" })
                 return
             }
-
             userData.fname = fname
         }
 
         if (lname) {
-
             if (!isValid(lname)) {
                 res.status(400).send({ status: false, Message: "Please provide user's last name" })
                 return
             }
-            
             userData.lname = lname
         }
 
         if (email) {
-
             if (!(validator.isEmail(email))) {
                 return res.status(400).send({ status: false, msg: 'enter valid email' })
             }
@@ -310,8 +273,8 @@ const updateUser = async function (req, res) {
             }
             userData.email = email
         }
-        if (phone) {
 
+        if (phone) {
             if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone))) {
                 res.status(400).send({ status: false, message: `phone no should be a valid phone no` })
                 return
@@ -322,12 +285,10 @@ const updateUser = async function (req, res) {
                 res.status(400).send({ status: false, message: `${phone}  phone is already registered` })
                 return
             }
-
             userData.phone = phone
         }
 
         if (password) {
-
             if (!isValidPassword(password)) {
                 res.status(400).send({ status: false, Message: "Please provide a vaild password ,Password should be of 8 - 15 characters" })
                 return
@@ -340,7 +301,6 @@ const updateUser = async function (req, res) {
         const files = req.files
 
         if (isValidfiles(files)) {
-
             const ProfilePicture = await uploadFile(files[0])
             userData.profileImage = ProfilePicture
 
@@ -413,13 +373,9 @@ const updateUser = async function (req, res) {
         const newUser = await userModel.findOneAndUpdate({ _id: req.params.userId }, userData, { new: true })
 
         res.status(200).send({ status: true, message: `updated sucessfully `, data: newUser });
-
     }
     catch (error) {
-
-        console.log(error)
         res.status(500).send({ status: false, Message: error.message })
-        
     }
 }
 
