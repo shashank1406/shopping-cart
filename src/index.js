@@ -1,9 +1,6 @@
 const express = require('express');
-
 var bodyParser = require('body-parser');
-
 const route = require('./routes/route.js');
-
 const multer = require('multer')
 
 const app = express();
@@ -22,8 +19,6 @@ mongoose.connect("mongodb+srv://user-open-to-all:hiPassword123@cluster0.xgk0k.mo
     .catch(err => console.log(err))
 
 app.use('/', route);
-
-
 
 
 app.listen(process.env.PORT || 3000, function() {
