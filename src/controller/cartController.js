@@ -68,8 +68,8 @@ const createCart = async function (req, res) {
         for (let i = 0; i < array.length; i++) {
            
             if (array[i].productId == productId) {
-               
-                const updateCart = await cartModel.findByIdAndUpdate({ _id:cartId },{"items.quantity":array[i].quantity+1}, { new: true });
+               array[i].quantity =array[i].quantity+1
+                const updateCart = await cartModel.findByIdAndUpdate({ _id:cartId },{items:array}, { new: true });
                 return res.status(200).send({ status: true, msg: 'sucesfully add product quentity', data: updateCart })
                 
             } else {
@@ -79,7 +79,7 @@ const createCart = async function (req, res) {
                     totalItems: checkCartExist.totalItems + 1
                 }
                 const updateCart = await cartModel.findOneAndUpdate({ userId: userId }, updateCartObject, { new: true });
-                res.status(200).send({ status: true, msg: 'sucesfully add  new product', data: updateCart })
+               res.status(200).send({ status: true, msg: 'sucesfully add  new product', data: updateCart })
             }
         }
 
