@@ -2,6 +2,7 @@ const cartModel = require('../model/cartModel')
 const userModel = require('../model/userModel')
 const prouctModel = require('../model/productModel')
 const productModel = require('../model/productModel')
+const mongoose = require('mongoose')
 
 
 
@@ -13,9 +14,15 @@ const isValid = function (value) {
     if (value === 0) return false
     return true;
 }
+
 const isValidRequestBody = function (requestBody) {
     return Object.keys(requestBody).length > 0
 }
+
+const isValidObjectId = function (objectId) {
+    return mongoose.Types.ObjectId.isValid(objectId)
+}
+
 
 // --------------------- TEHTH API TO CREATE NEW CART AND AD PRODUCT IN CART -------------------------------------------
 
@@ -59,29 +66,24 @@ const createCart = async function (req, res) {
         if (!checkCartExist) {
             let createCartObject = { userId: userId, items: [{ productId: productId, quantity: 1 }], totalPrice: checkProduct.price, totalItems: 1 }
             const createCart = await cartModel.create(createCartObject);
-            res.status(201).send({ statu: true, msg: 'sucesfully created', data: createCart })
+            res.status(201).send({ statu: true, msg: 'sucesfully created cart ', data: createCart })
         }
 
         let array = checkCartExist.items
-
-        
         for (let i = 0; i < array.length; i++) {
-           
             if (array[i].productId == productId) {
-               array[i].quantity =array[i].quantity+1
-                const updateCart = await cartModel.findByIdAndUpdate({ _id:cartId },{items:array}, { new: true });
-                return res.status(200).send({ status: true, msg: 'sucesfully add product quentity', data: updateCart })
-                
-            } else {
-                let updateCartObject = {
-                    $addToSet: { items: { productId: productId, quantity: 1 } },
-                    totalPrice: checkCartExist.totalPrice + checkProduct.price,
-                    totalItems: checkCartExist.totalItems + 1
-                }
-                const updateCart = await cartModel.findOneAndUpdate({ userId: userId }, updateCartObject, { new: true });
-               res.status(200).send({ status: true, msg: 'sucesfully add  new product', data: updateCart })
+                array[i].quantity = array[i].quantity + 1
+                const updateCart = await cartModel.findByIdAndUpdate({ _id: cartId }, { items: array, totalPrice: checkCartExist.totalPrice + checkProduct.price }, { new: true });
+                return res.status(200).send({ status: true, msg: 'sucesfully add product quentity', data: updateCart });
             }
         }
+        let updateCartObject = {
+            $addToSet: { items: { productId: productId, quantity: 1 } },
+            totalPrice: checkCartExist.totalPrice + checkProduct.price,
+            totalItems: checkCartExist.totalItems + 1
+        }
+        const updateCart = await cartModel.findOneAndUpdate({ userId: userId }, updateCartObject, { new: true });
+        res.status(200).send({ status: true, msg: 'sucesfully add  new product', data: updateCart })
 
     } catch (error) {
         console.log(error)
@@ -143,19 +145,22 @@ const updateCart = async function (req, res) {
         if (!cartFind) {
             return res.status(404).send({ status: false, message: `cart does not exit` })
         }
+        console.log(removeProduct)
+        
 
         let array = cartFind.items
-        for (let i = o; i < array.length; i++) {
-            if (array[i].productId === productId) {
-                let productid1 = array[i]._id
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].productId == productId) {
                 if (removeProduct === 0) {
-                    const updateProductItem = await cartModel.findByIdAndDelete(productid1)
+                    const updateProductItem = await cartModel.findByIdAndDelete(array[i]._id)
+                    console.log(updateProductItem)
                     return res.status(200).send({ status: true, msg: 'sucessfully removed product', data: cartFind })
                 }
-                if (removeProduct === 1) {
 
-                    const updateProductItem = await cartModel.findOneAndUpdate({ _id: productid1 }, { quantity: array[i].quantity - 1 }, { new: true })
-                    return res.status(200).send({ status: true, msg: 'sucessfully removed product', data: updateProductItem })
+                if (removeProduct === 1) {
+                    array[i].quantity = array[i].quantity - 1
+                    const updateCart = await cartModel.findByIdAndUpdate({ _id: cartId }, { items: array, totalPrice: cartFind.totalPrice - product.price }, { new: true });
+                    return res.status(200).send({ status: true, msg: 'sucessfully removed product', data: updateCart })
                 }
             }
         }
