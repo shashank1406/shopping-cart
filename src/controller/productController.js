@@ -30,9 +30,7 @@ const isValidfiles = function (files) {
         return true
 }
 
-const isValidTitle = function (title) {
-    return ['Mr', 'Mrs', 'Miss'].indexOf(title) !== -1
-}
+
 
 // ====================== five api ===============================================================================================//
 

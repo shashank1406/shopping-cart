@@ -32,15 +32,15 @@ router.put("/products/:productId", productController.updateProductById);
 
 router.delete("/products/:productId", productController.deleteProductById);
 
-//  third featur apis 
+// third featur apis 
 
-router.post("/users/:userId/cart ", cartController.createCart);
+router.post("/users/:userId/cart", cartController.createCart);
 
 router.put("/users/:userId/cart", cartController.updateCart);
 
 router.get("/users/:userId/cart", cartController.getCart);
 
-router.delete(" /users/:userId/cart", cartController.deleteCart);
+router.delete("/users/:userId/cart", cartController.deleteCart);
 
 // fourth feature apis
 
