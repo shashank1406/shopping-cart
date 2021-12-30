@@ -44,9 +44,9 @@ const createProduct = async function (req, res) {
             res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
             return
         }
-       const { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = requestBody
-       const files = req.files
-       let  availableSizesNewArray =[]
+        const { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = requestBody
+        const files = req.files
+        let availableSizesNewArray = []
         if (!isValidfiles(files)) {
             res.status(400).send({ status: false, Message: "Please provide product's image" })
             return

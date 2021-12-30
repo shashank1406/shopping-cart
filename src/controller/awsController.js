@@ -16,20 +16,20 @@ const uploadFile = async function (file, name) {
         // Create S3 service object
         const s3 = new aws.S3({ apiVersion: "2006-03-01" })
         const uploadParams = {
-            ACL: "public-read", 
-            Bucket: "classroom-training-bucket", 
-            Key: name + "/" + file.originalname, 
+            ACL: "public-read",
+            Bucket: "classroom-training-bucket",
+            Key: name + "/" + file.originalname,
             Body: file.buffer,
         }
         s3.upload(uploadParams, function (err, data) {
             if (err) {
                 return reject({ "error": err })
             }
-           
+
             return resolve(data.Location) //HERE 
         })
     })
 }
 
 
-module.exports.uploadFile=uploadFile
+module.exports.uploadFile = uploadFile

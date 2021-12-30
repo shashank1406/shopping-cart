@@ -17,9 +17,9 @@ router.post("/register", userController.createUser);
 
 router.post("/login", userController.doLogin);
 
-router.get("/user/:userId/profile",middleWare.auth, userController.getuserById);
+router.get("/user/:userId/profile", middleWare.auth, userController.getuserById);
 
-router.put("/user/:userId/profile",middleWare.auth, userController.updateUser);
+router.put("/user/:userId/profile", middleWare.auth, userController.updateUser);
 
 // second feature apis 
 
@@ -35,19 +35,19 @@ router.delete("/products/:productId", productController.deleteProductById);
 
 // third featur apis 
 
-router.post("/users/:userId/cart", cartController.createCart);
+router.post("/users/:userId/cart", middleWare.auth, cartController.createCart);
 
-router.put("/users/:userId/cart", cartController.updateCart);
+router.put("/users/:userId/cart", middleWare.auth, cartController.updateCart);
 
-router.get("/users/:userId/cart", cartController.getCart);
+router.get("/users/:userId/cart", middleWare.auth, cartController.getCart);
 
-router.delete("/users/:userId/cart", cartController.deleteCart);
+router.delete("/users/:userId/cart", middleWare.auth, cartController.deleteCart);
 
 // fourth feature apis
 
-router.post("/users/:userId/orders", orderController.createOrder);
+router.post("/users/:userId/orders", middleWare.auth, orderController.createOrder);
 
-router.put("/users/:userId/orders", orderController.updateOrderDetail);
+router.put("/users/:userId/orders", middleWare.auth, orderController.updateOrderDetail);
 
 
 module.exports = router;

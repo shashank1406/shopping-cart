@@ -1,5 +1,5 @@
 const userModel = require('../model/userModel');
-const {uploadFile} = require('./awsController')
+const { uploadFile } = require('./awsController')
 const bcrypt = require('bcrypt')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
@@ -35,7 +35,7 @@ const createUser = async function (req, res) {
             return
         }
 
-        const {fname,lname,email,phone,password,address} = requestBody
+        const { fname, lname, email, phone, password, address } = requestBody
 
         const files = req.files
         if (!isValidfiles(files)) {
@@ -66,8 +66,8 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide password" })
             return
         }
-        if(address){
-            if(address.shipping){
+        if (address) {
+            if (address.shipping) {
                 if (!isValid(address.shipping.street)) {
                     res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
                     return
@@ -81,7 +81,7 @@ const createUser = async function (req, res) {
                     return
                 }
             }
-            if(address.billing){
+            if (address.billing) {
                 if (!isValid(address.billing.street)) {
                     res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
                     return
@@ -157,7 +157,7 @@ const doLogin = async function (req, res) {
     try {
         let requestBody = req.body
 
-     // request body validation 
+        // request body validation 
 
         if (!isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide login details' })
@@ -201,7 +201,7 @@ const doLogin = async function (req, res) {
 
 const getuserById = async (req, res) => {
     try {
-         //  authorization  //
+        //  authorization  //
         const userId = req.params.userId
 
         if (!(userId === req.userId)) {
@@ -239,9 +239,9 @@ const updateUser = async function (req, res) {
         //     return
         // }
 
-        const {fname,lname,email,phone,password,address} = requestBody
+        const { fname, lname, email, phone, password, address } = requestBody
         const userData = {}
-    
+
         if (fname) {
             if (!isValid(fname)) {
                 res.status(400).send({ status: false, Message: "Please provide user's first name" })
@@ -306,69 +306,69 @@ const updateUser = async function (req, res) {
 
         }
 
-      if(address){
+        if (address) {
 
-          if(address.shipping){
+            if (address.shipping) {
 
-            if(address.shipping.street){
+                if (address.shipping.street) {
 
-                if (!isValid(address.shipping.street)) {
-                    res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
-                    return
+                    if (!isValid(address.shipping.street)) {
+                        res.status(400).send({ status: false, Message: "Please provide street name in shipping address" })
+                        return
+                    }
+                    userData["address.shipping.street"] = address.shipping.street
                 }
-                userData["address.shipping.street"] = address.shipping.street
-            }
-        
-              if(address.shipping.city){
-                if (!isValid(address.shipping.city)) {
-                    res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
-                    return
-                }
-                userData["address.shipping.city"]=address.shipping.city
-            }
-        
-            if(address.shipping.pincode){
-                if (!isValid(address.shipping.pincode)) {
-                    res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
-                    return
-                }
-                userData["address.shipping.pincode"] = address.shipping.pincode
-            }
 
-          }
-
-          if(address.billing){
-
-            if(address.billing.street){
-
-                if (!isValid(address.billing.street)) {
-                    res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
-                    return
+                if (address.shipping.city) {
+                    if (!isValid(address.shipping.city)) {
+                        res.status(400).send({ status: false, Message: "Please provide city name in shipping address" })
+                        return
+                    }
+                    userData["address.shipping.city"] = address.shipping.city
                 }
-                userData["address.billing.street"] = address.billing.street
-            }
-            
-            if(address.billing.city){
-                if (!isValid(address.billing.city)) {
-                    res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
-                    return
+
+                if (address.shipping.pincode) {
+                    if (!isValid(address.shipping.pincode)) {
+                        res.status(400).send({ status: false, Message: "Please provide pincode in shipping address" })
+                        return
+                    }
+                    userData["address.shipping.pincode"] = address.shipping.pincode
                 }
-        
-                userData["address.billing.city"] = address.billing.city
-            }
-        
-            if(address.billing.pincode){
-        
-                if (!isValid(address.billing.pincode)) {
-                    res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
-                    return
-                }
-        
-                userData["address.billing.pincode"] = address.billing.pincode
+
             }
 
-          }
-      }
+            if (address.billing) {
+
+                if (address.billing.street) {
+
+                    if (!isValid(address.billing.street)) {
+                        res.status(400).send({ status: false, Message: "Please provide street name in billing address" })
+                        return
+                    }
+                    userData["address.billing.street"] = address.billing.street
+                }
+
+                if (address.billing.city) {
+                    if (!isValid(address.billing.city)) {
+                        res.status(400).send({ status: false, Message: "Please provide city name in billing address" })
+                        return
+                    }
+
+                    userData["address.billing.city"] = address.billing.city
+                }
+
+                if (address.billing.pincode) {
+
+                    if (!isValid(address.billing.pincode)) {
+                        res.status(400).send({ status: false, Message: "Please provide pincode in billing address" })
+                        return
+                    }
+
+                    userData["address.billing.pincode"] = address.billing.pincode
+                }
+
+            }
+        }
 
         const newUser = await userModel.findOneAndUpdate({ _id: req.params.userId }, userData, { new: true })
 

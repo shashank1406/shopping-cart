@@ -36,9 +36,9 @@ const createCart = async function (req, res) {
 
         //  authroization
 
-        // if (!(userId === jwtUserId)) {
-        //     return res.status(400).send({ status: false, msg: "unauthorized access" })
-        // }
+        if (!(userId === jwtUserId)) {
+            return res.status(400).send({ status: false, msg: "unauthorized access" })
+        }
 
         if (!isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'Please provide cart details' });
@@ -103,9 +103,9 @@ const updateCart = async function (req, res) {
 
         //  authroization
 
-        // if (!(userId === jwtUserId)) {
-        //     return res.status(400).send({ status: false, msg: "unauthorized access" })
-        // }
+        if (!(userId === jwtUserId)) {
+            return res.status(400).send({ status: false, msg: "unauthorized access" })
+        }
         if (!isValid(requestBody)) {
             const cart = await cartModel.findOne({ userId: userId })
             return res.status(400).send({ status: true, message: 'no parameteres passed', data: cart })
@@ -144,22 +144,19 @@ const updateCart = async function (req, res) {
         if (!cartFind) {
             return res.status(404).send({ status: false, message: `cart does not exit` })
         }
-        console.log(removeProduct)
-        
-
         let array = cartFind.items
         for (let i = 0; i < array.length; i++) {
             if (array[i].productId == productId) {
+                let totelProductprice = array[i].quantity * product.price
                 if (removeProduct === 0) {
-                    let deleteArrayIndex=array.indexOf(array[i])
-                    console.log(deleteArrayIndex)
-
-                    array.splice(0)
-                    const updateProductItem = await cartModel.findOneAndUpdate({_id: cartId},array,{new:true})
-                    return res.status(200).send({ status: true, msg: 'sucessfully removed product', data:updateProductItem})
+                    const updateProductItem = await cartModel.findOneAndUpdate({ _id: cartId }, { $pull: { items: { productId: productId } }, totalPrice: cartFind.totalPrice - totelProductprice, totalItems: cartFind.totalItems - 1 }, { new: true })
+                    return res.status(200).send({ status: true, msg: 'sucessfully removed product', data: updateProductItem })
                 }
-
                 if (removeProduct === 1) {
+                    if (array[i].quantity === 1 && removeProduct === 1) {
+                        const removeCart = await cartModel.findOneAndUpdate({ _id: cartId }, { $pull: { items: { productId: productId } }, totalPrice: cartFind.totalPrice - totelProductprice, totalItems: cartFind.totalItems - 1 }, { new: true })
+                        return res.status(200).send({ status: true, msg: 'sucessfully removed product or cart is empty', data: removeCart })
+                    }
                     array[i].quantity = array[i].quantity - 1
                     const updateCart = await cartModel.findByIdAndUpdate({ _id: cartId }, { items: array, totalPrice: cartFind.totalPrice - product.price }, { new: true });
                     return res.status(200).send({ status: true, msg: 'sucessfully decress product', data: updateCart })
@@ -186,9 +183,9 @@ const getCart = async function (req, res) {
 
         //    authroization 
 
-        // if (!(userId === jwtUserId)) {
-        //     return res.status(400).send({ status: false, msg: "unauthorized access" })
-        // }
+        if (!(userId === jwtUserId)) {
+            return res.status(400).send({ status: false, msg: "unauthorized access" })
+        }
 
         const checkCart = await cartModel.findOne({ userId: userId })
         if (!checkCart) {
@@ -219,9 +216,9 @@ const deleteCart = async function (req, res) {
 
         //    authroization  to check the uer i or the jwt user id is match or not
 
-        // if (!(userId === jwtUserId)) {
-        //     return res.status(400).send({ status: false, msg: "unauthorized access" })
-        // }
+        if (!(userId === jwtUserId)) {
+            return res.status(400).send({ status: false, msg: "unauthorized access" })
+        }
 
         const checkCart = await cartModel.findOne({ userId: userId })
         if (!checkCart) {

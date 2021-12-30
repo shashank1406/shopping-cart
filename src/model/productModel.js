@@ -16,19 +16,19 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
 
-    price: { 
+    price: {
         type: Number,
         required: true,
         trim: true
     },
 
-    currencyId: { 
+    currencyId: {
         type: String,
         required: true,
         trim: true
     },
 
-    currencyFormat: { 
+    currencyFormat: {
         type: String,
         required: true,
         trim: true
@@ -39,7 +39,7 @@ const productSchema = new mongoose.Schema({
         default: false
     },
 
-    productImage: { 
+    productImage: {
         type: String,
         required: true,
         trim: true
@@ -50,7 +50,7 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
 
-    availableSizes: [{ 
+    availableSizes: [{
         type: String,
         trim: true,
         enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
@@ -59,7 +59,7 @@ const productSchema = new mongoose.Schema({
         type: Number,
         trim: true
     },
-    deletedAt: {  
+    deletedAt: {
         type: Date
     },
     isDeleted: {
