@@ -1,6 +1,5 @@
 const cartModel = require('../model/cartModel')
 const userModel = require('../model/userModel')
-const prouctModel = require('../model/productModel')
 const productModel = require('../model/productModel')
 const mongoose = require('mongoose')
 
@@ -152,15 +151,18 @@ const updateCart = async function (req, res) {
         for (let i = 0; i < array.length; i++) {
             if (array[i].productId == productId) {
                 if (removeProduct === 0) {
-                    const updateProductItem = await cartModel.findByIdAndDelete(array[i]._id)
-                    console.log(updateProductItem)
-                    return res.status(200).send({ status: true, msg: 'sucessfully removed product', data: cartFind })
+                    let deleteArrayIndex=array.indexOf(array[i])
+                    console.log(deleteArrayIndex)
+
+                    array.splice(0)
+                    const updateProductItem = await cartModel.findOneAndUpdate({_id: cartId},array,{new:true})
+                    return res.status(200).send({ status: true, msg: 'sucessfully removed product', data:updateProductItem})
                 }
 
                 if (removeProduct === 1) {
                     array[i].quantity = array[i].quantity - 1
                     const updateCart = await cartModel.findByIdAndUpdate({ _id: cartId }, { items: array, totalPrice: cartFind.totalPrice - product.price }, { new: true });
-                    return res.status(200).send({ status: true, msg: 'sucessfully removed product', data: updateCart })
+                    return res.status(200).send({ status: true, msg: 'sucessfully decress product', data: updateCart })
                 }
             }
         }
