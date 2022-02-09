@@ -25,12 +25,14 @@ const productSchema = new mongoose.Schema({
     currencyId: {
         type: String,
         required: true,
+        default:INR,
         trim: true
     },
 
     currencyFormat: {
         type: String,
         required: true,
+        default:"₹",
         trim: true
     },
 

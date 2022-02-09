@@ -43,7 +43,7 @@ const createOrder = async function (req, res) {
             return;
         }
         if (!isValid(userId)) {
-            return res.status(400).send({ status: true, message: 'userid is required in the request body' })
+            return res.status(400).send({ status:false, message: 'userid is required in the request body' })
         }
         if (!isValidObjectId(userId)) {
             return res.status(400).send({ status: false, message: `${userId} is not a valid user id` })
@@ -64,7 +64,7 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, message: 'totalQuantity required in the request body' })
         }
         const createProduct = await orderModel.create(requestBody);
-        res.status(201).send({ status: true, msg: 'sucesfully created order', data: createProduct })
+        res.status(200).send({ status: true, msg: 'sucesfully created order', data: createProduct })
 
     } catch (error) {
         res.status(500).send({ status: false, Message: error.message })
@@ -93,17 +93,20 @@ const updateOrderDetail = async function (req, res) {
             return;
         }
         if (!isValid(orderId)) {
-            return res.status(400).send({ status: true, message: 'orderId is required in the request body' })
+            return res.status(400).send({ status:false, message: 'orderId is required in the request body' })
         }
         if (!isValidObjectId(orderId)) {
             return res.status(400).send({ status: false, message: `${orderId} is not a valid user id` })
         }
         const checkOrder = await orderModel.findOne({ _id: orderId, isDeleted: false })
+        if (!(checkOrder)) {
+            return res.status(400).send({ status:false, message: 'order id not correct ' })
+        } 
         if (!(checkOrder.userId == userId)) {
-            return res.status(400).send({ status: true, message: 'order not blongs to the user ' })
+            return res.status(400).send({ status: false, message: 'order not blongs to the user ' })
         } ""
         if (!(checkOrder.cancellable === true)) {
-            return res.status(400).send({ status: true, message: 'order didnt have the cancellable policy ' })
+            return res.status(400).send({ status:false, message: 'order didnt have the cancellable policy ' })
         }
         let updateOrder = await orderModel.findOneAndUpdate({ _id: orderId }, { status: "canceled" }, { new: true })
         res.status(200).send({ status: true, msg: 'sucesfully updated', data: updateOrder })

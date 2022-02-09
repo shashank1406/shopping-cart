@@ -101,7 +101,7 @@ const updateCart = async function (req, res) {
         const jwtUserId = req.userId
         const { cartId, productId, removeProduct } = requestBody
 
-        //  authroization
+        //  authroization //
 
         if (!(userId === jwtUserId)) {
             return res.status(400).send({ status: false, msg: "unauthorized access" })
@@ -224,10 +224,12 @@ const deleteCart = async function (req, res) {
         if (!checkCart) {
             return res.status(400).send({ status: false, msg: 'cart does not exist ' })
         }
+
         const checkUser = await userModel.findById(userId)
         if (!checkUser) {
             return res.status(400).send({ status: false, msg: 'user does  does not exist ' })
         }
+        
         const deleteCart = await cartModel.findOneAndUpdate({ userId: userId }, { items: [], totalPrice: 0, totalItems: 0 }, { new: true })
         res.status(200).send({ status: true, msg: 'sucessfully deleted ', data: deleteCart })
     }

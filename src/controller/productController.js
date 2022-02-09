@@ -67,10 +67,22 @@ const createProduct = async function (req, res) {
             res.status(400).send({ status: false, Message: "Please provide currencyId" })
             return
         }
+        if (currencyId != INR) {
+            res.status(400).send({ status: false, Message: "currency should be INR" })
+            return
+        }
+
+
         if (!isValid(currencyFormat)) {
             res.status(400).send({ status: false, Message: "Please provide currency Format" })
             return
         }
+        if (currencyFormat != "₹") {
+            res.status(400).send({ status: false, Message: "cureenccy format shouls be ₹ " })
+            return
+        }
+
+
         if (!isValid(style)) {
             res.status(400).send({ status: false, Message: "Please provide product's style" })
             return
@@ -148,16 +160,34 @@ const getProductBYQuery = async function (req, res) {
             obj.isDeleted = false
             obj.deletedAt = null
 
-            const getProductsList = await productModel.find(obj).sort({ price: 1 })
+            if (req.query.sort === -1) {
+                const getProductsList = await productModel.find(obj).sort({ price: -1 })
 
-            if (!getProductsList || getProductsList.length == 0) {
-                res.status(400).send({ status: false, message: `product is not available right now.` })
+                if (!getProductsList || getProductsList.length == 0) {
+                    res.status(400).send({ status: false, message: `product is not available right now.` })
+                } else {
+                    res.status(200).send({ status: true, message: 'Success', data: getProductsList })
+                }
+
             } else {
-                res.status(200).send({ status: true, message: 'Success', data: getProductsList })
+                const getProductsList = await productModel.find(obj).sort({ price: 1 })
+
+                if (!getProductsList || getProductsList.length == 0) {
+                    res.status(400).send({ status: false, message: `product is not available right now.` })
+                } else {
+                    res.status(200).send({ status: true, message: 'Success', data: getProductsList })
+                }
             }
+
+
         } else {
-            const getListOfProducts = await productModel.find({ isDeleted: false, deletedAt: null }).sort({ price: 1 })
-            res.status(200).send({ status: true, message: 'Success', data: getListOfProducts })
+            if (req.query.sort === -1) {
+                const getListOfProducts = await productModel.find({ isDeleted: false, deletedAt: null }).sort({ price: -1 })
+                res.status(200).send({ status: true, message: 'Success', data: getListOfProducts })
+            } else {
+                const getListOfProducts = await productModel.find({ isDeleted: false, deletedAt: null }).sort({ price: 1 })
+                res.status(200).send({ status: true, message: 'Success', data: getListOfProducts })
+            }
         }
     } catch (err) {
         res.status(500).send({ status: false, msg: err.message })
@@ -171,7 +201,7 @@ const getProductBYQuery = async function (req, res) {
 const getProductById = async function (req, res) {
     try {
         let productId = req.params.productId
-        const searchProduct = await productModel.findById(productId)
+        const searchProduct = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!searchProduct) {
             return res.status(400).send({ status: false, msg: 'product does not exist with this prouct id or incorrect product id' })
         }
